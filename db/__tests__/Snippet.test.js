@@ -1,5 +1,6 @@
 const Snippet = require('../Snippet');
 const utils = require('../utils');
+const ErrorWithHttpStatus = require('../../ErrorWithStatus');
 
 /* This is how we can test the fs 
 const fs = require('fs').promises;
@@ -21,31 +22,45 @@ beforeEach(() => {
     'snippets.json': [
       {
         id: '1',
+        author: 'Andrew',
         code: '// Welcome to JS!',
         title: 'single-line.js',
-        description: 'single line comment in JS',
-        language: 'JavaScript',
+        description: 'This is how you do a single line comment in JS',
+        language: 'javascript',
+        comments: [],
+        favorites: 0,
       },
       {
         id: '2',
-        code: 'code code code',
+        author: 'Andrew',
+        code:
+          'for (var i = 0; i < 5; i++) {\n  setTimeout(function() {\n    console.log(i);\n  }, 1000);\n}',
         title: 'var-challenge.js',
         description: 'scoping challenge problem',
-        language: 'JavaScript',
+        language: 'javascript',
+        comments: [],
+        favorites: 0,
       },
       {
         id: '3',
-        code: 'code code code',
+        author: 'Scott',
+        code:
+          'switch (numOfStudents) {\n  case 1:\n    // do something;\n    break;\n  case 2:\n  case 3:\n    // do something;\n    break;\n  default:\n  // do some default behavior.\n}',
         title: 'switch.js',
         description: 'Switch statement',
-        language: 'JavaScript',
+        language: 'javascript',
+        comments: [],
+        favorites: 0,
       },
       {
         id: '4',
-        code: 'code code code',
-        title: 'inheritance.js',
-        description: 'OOP inheritance',
-        language: 'JavaScript',
+        author: 'Andrew',
+        code: '<link rel="stylesheet" type="text/css" href="theme.css">',
+        title: 'link.html',
+        description: 'How to link a stylesheet',
+        language: 'HTML',
+        comments: [],
+        favorites: 0,
       },
     ],
   };
@@ -99,6 +114,22 @@ describe('Snippet', () => {
         language: 'JavaScript',
       });
     });
+
+    it('throws ErrorWithHttpStatus 400 on invalid sytnax', async () => {
+      expect.assertions(2);
+      // create a new snippet
+      try {
+        await Snippet.insert({
+          author: 'Mr. Test',
+          code: '// new code',
+          title: 'newsnippet.js',
+          description: 'a new snippet',
+        });
+      } catch (err) {
+        expect(err).toBeInstanceOf(ErrorWithHttpStatus);
+        expect(err.status).toBe(400);
+      }
+    });
   });
 
   describe('read', () => {
@@ -112,16 +143,19 @@ describe('Snippet', () => {
       expect(snippet.length).toBe(1);
       expect(snippet[0]).toMatchObject({
         id: '1',
+        author: 'Andrew',
         code: '// Welcome to JS!',
         title: 'single-line.js',
-        description: 'single line comment in JS',
-        language: 'JavaScript',
+        description: 'This is how you do a single line comment in JS',
+        language: 'javascript',
+        comments: [],
+        favorites: 0,
       });
     });
 
     it('gets some with a single query', async () => {
-      const snippets = await Snippet.select({ language: 'JavaScript' });
-      expect(snippets.length).toBe(4);
+      const snippets = await Snippet.select({ language: 'javascript' });
+      expect(snippets.length).toBe(3);
     });
 
     it('gets some with a double query', async () => {
@@ -161,8 +195,10 @@ describe('Snippet', () => {
         author: 'Me',
         code: '// Welcome to JS!',
         title: 'single-line.js',
-        description: 'single line comment in JS',
-        language: 'JavaScript',
+        description: 'This is how you do a single line comment in JS',
+        language: 'javascript',
+        comments: [],
+        favorites: 0,
       });
     });
   });
